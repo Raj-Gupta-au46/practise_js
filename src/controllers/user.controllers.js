@@ -93,52 +93,28 @@ const createUser = async function (req, res) {
 
 const loginUser = async function (req, res) {
   try {
-    let emailId = req.body.email;
+    let name = req.body.username;
     let password = req.body.password;
-    // console.log(emailId, password);
 
-    if (!isValidEmail(emailId)) {
-      // Email validation
+    let author = await authors.findOne({ name });
+    if (!author) {
       return res
-        .status(400)
-        .send({ status: false, message: "Please provide valid Email" });
+        .status(401)
+        .json({ message: "Username or password is not correct" });
     }
 
-    if (!isValidPassword(password)) {
-      // Password validation
-      return res.status(400).send({
-        status: false,
-        message:
-          "Your password must have characters, contain at least one number or symbol, and have a mixture of uppercase and lowercase letters.",
-      });
-    }
-
-    let author = await authors.findOne({ email: emailId });
-    if (!author)
-      return res.send({
-        status: false,
-        msg: "Username or password is not correct",
-      });
-
+    // compare the password
     const isPasswordValid = await bcrypt.compare(password, author.password);
     if (!isPasswordValid) {
-      return res.send({
-        status: false,
-        msg: "Username or password is not correct",
-      });
+      return res.status(401).json({ message: "Invalid password" });
     }
 
-    let token = jwt.sign(
-      {
-        authorId: author._id.toString(),
-        organization: "UNIBIT",
-        name: "Raj",
-      },
-      "UNIBIT_TASK"
-    );
-    res.status(200).send({ status: true, data: { token: token, author } });
+    // here we are creating the JSON WEB TOKEN (JWT)
+    const token = jwt.sign({ userId: author._id }, process.env.SECRET_KEY);
+
+    res.status(200).json({ token, name, author });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error.message });
   }
 };
 
