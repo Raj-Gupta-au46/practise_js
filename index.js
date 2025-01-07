@@ -3,13 +3,12 @@ const bodyParser = require("body-parser");
 const route = require("./src/routes/routes.js");
 const { default: mongoose } = require("mongoose");
 const app = express();
-require("dotenv").config();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose
-  .connect(process.env.MONGODB_URI, {
+  .connect("mongodb://127.0.0.1:27017/Testing", {
     useNewUrlParser: true,
   })
   .then(() => console.log("MongoDb is connected"))

@@ -9,6 +9,8 @@ const {
 
 const verifyToken = require("../middleware/auth.js");
 
+router.put("/update/:userId", userController.updateuser);
+
 router.post("/createUser", userController.createUser); // Creating Author Data ok
 
 router.post("/login", userController.loginUser); //User login and generate token ok

@@ -13,7 +13,7 @@ const createUser = async function (req, res) {
       return res.status(400).send({ status: false, message: "Body is empty" });
     }
 
-    let { name, title, email, password } = data; //Destructuring
+    let { name, title, email, password, houseNo } = data; //Destructuring
 
     if (!name || !title || !email || !password) {
       return res
@@ -47,30 +47,30 @@ const createUser = async function (req, res) {
 
     /*-----------------------------------Checking Valid Title or Not------------------------------------------------*/
 
-    if (title != "Mr" && title != "Mrs" && title != "Miss") {
-      return res.status(400).send({ msg: "Not have appropiate title" });
-    }
+    // if (title != "Mr" && title != "Mrs" && title != "Miss") {
+    //   return res.status(400).send({ msg: "Not have appropiate title" });
+    // }
 
-    if (!isValidName(name)) {
-      // Name validation
-      return res.status(400).send({ status: false, message: "name is Wrong" });
-    }
+    // if (!isValidName(name)) {
+    //   // Name validation
+    //   return res.status(400).send({ status: false, message: "name is Wrong" });
+    // }
 
-    if (!isValidEmail(email)) {
-      // Email validation
-      return res
-        .status(400)
-        .send({ status: false, message: "Please provide valid Email" });
-    }
+    // if (!isValidEmail(email)) {
+    //   // Email validation
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, message: "Please provide valid Email" });
+    // }
 
-    if (!isValidPassword(password)) {
-      // Password validation
-      return res.status(400).send({
-        status: false,
-        message:
-          "Your password must have 8 characters, contain at least one number or symbol, and have a mixture of uppercase and lowercase letters.",
-      });
-    }
+    // if (!isValidPassword(password)) {
+    //   // Password validation
+    //   return res.status(400).send({
+    //     status: false,
+    //     message:
+    //       "Your password must have 8 characters, contain at least one number or symbol, and have a mixture of uppercase and lowercase letters.",
+    //   });
+    // }
     /**----------------------------------hash password------------------------------------------- */
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -82,6 +82,9 @@ const createUser = async function (req, res) {
       title,
       email,
       password: hashedPassword,
+      address: {
+        houseNo,
+      },
     });
     res.status(201).send({ status: true, data: userCreate });
   } catch (error) {
@@ -118,6 +121,31 @@ const loginUser = async function (req, res) {
   }
 };
 
+const updateuser = async function (req, res) {
+  try {
+    const id = req?.params?.userId;
+    const data = req?.body;
+
+    // Perform the update without checking for duplicate email
+    const userUpdate = await authors.findByIdAndUpdate(
+      { _id: id }, // Filter by _id
+      data, // Update data
+      { new: true } // Return the updated document
+    );
+
+    if (!userUpdate) {
+      return res.status(404).json({ status: false, message: "User not found" });
+    }
+
+    res.status(200).json({ status: true, data: userUpdate });
+  } catch (error) {
+    console.log(error, "error");
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
 module.exports.createUser = createUser;
 
 module.exports.loginUser = loginUser;
+
+module.exports.updateuser = updateuser;
